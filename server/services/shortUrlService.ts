@@ -1,38 +1,65 @@
 import ShortUrlModel from '../models/shortUrl'
 import { UrlHashService } from './urlHashService'
+import { ObjectId } from 'mongodb'
 
 export interface ShortUrlService {
-  createShortUrl(longUrl: string): Promise<typeof ShortUrlModel>
-  listShortUrls(limit: number, offset: number): Promise<Array<typeof ShortUrlModel>>
-  getShortUrl(shortUrl: string): Promise<typeof ShortUrlModel>
+  createShortUrl(longUrl: string): Promise<ShortUrlResult | null>
+  listShortUrls(afterId?: string, limit?: number): Promise<Array<ShortUrlResult | null>>
+  getShortUrl(shortUrl: string): Promise<ShortUrlResult | null>
 }
 
-const shortUrlServiceFactory = (
+interface Dependencies {
   shortUrlModel: typeof ShortUrlModel,
-  hashingService: UrlHashService
-): ShortUrlService => {
+  hashingService: UrlHashService,
+  baseUrl: string
+}
+
+interface ShortUrlResult {
+  id: string
+  originalUrl: string
+  shortUrl: string
+}
+
+function documentMapper(document: any): ShortUrlResult | null{
+  return document ? {
+    id: document._id,
+    shortUrl: document.shortUrl,
+    originalUrl: document.originalUrl
+  }: null
+}
+
+const shortUrlServiceFactory = ({
+  shortUrlModel,
+  hashingService,
+  baseUrl
+}: Dependencies): ShortUrlService => {
   return {
-    async createShortUrl(longUrl) {
-      const shortUrl = hashingService.hashUrl(longUrl).slice(0,8)
+    async createShortUrl(originalUrl) {
+      const shortUrl = baseUrl + hashingService.hashUrl(originalUrl).slice(0,8)
       const existingHash = await shortUrlModel.findOne({ shortUrl })
       if (existingHash) {
         throw new Error('Collision found.')
       }
       return await shortUrlModel.create({
-        longUrl,
+        originalUrl,
         shortUrl
       })
+      .then(documentMapper)
     },
-    async listShortUrls(limit, offset) {
-      const results = await shortUrlModel.find({}, null, {
-        skip: offset,
-        limit
+    async listShortUrls(afterId, limit) {
+      const filters = afterId
+        ? { _id: { $gte: afterId }}
+        : {}
+      const results = await shortUrlModel.find({
+        ...filters
+      }, null, {
+        limit: limit ? limit : 10
       })
-      return results
+      return results.map(documentMapper)
     },
     async getShortUrl(shortUrl: string) {
       const result = await shortUrlModel.findOne({ shortUrl })
-      return result
+      return documentMapper(result)
     }
   }
 }
