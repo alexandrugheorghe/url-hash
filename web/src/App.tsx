@@ -17,14 +17,14 @@ function App() {
       afterId: undefined
     }
   })
-  const [url, setUrl] = useState<string>()
+  const [url, setUrl] = useState<string>('')
   const [urlList, setUrlList] = useState<Array<TinyUrl>>([])
 
   useEffect(() => {
     shortUrlsQuery().then(result => {
       setUrlList(result?.data?.shortUrls)
     })
-  }, [url, shortUrlsQuery])
+  }, [setUrlList, shortUrlsQuery])
 
   const onSubmit: FormEventHandler = (event) => {
     event.preventDefault()
