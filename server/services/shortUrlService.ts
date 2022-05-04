@@ -1,6 +1,5 @@
 import ShortUrlModel from '../models/shortUrl'
 import { UrlHashService } from './urlHashService'
-import { ObjectId } from 'mongodb'
 
 export interface ShortUrlService {
   createShortUrl(longUrl: string): Promise<ShortUrlResult | null>

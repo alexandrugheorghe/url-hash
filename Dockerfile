@@ -1,3 +1,11 @@
-FROM node:18-buster
+FROM node:18-alpine
 
-WORKDIR /opt/api
+WORKDIR /backend
+
+COPY package.json ./
+
+RUN yarn
+
+COPY . ./
+
+CMD ["yarn", "start"]

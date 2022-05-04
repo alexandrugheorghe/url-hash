@@ -2,9 +2,21 @@ services:
   backend:
     build: .
     ports:
-      - "8000:8000"
+      - "4000:4000"
+    environment:
+      MONGO_URL: database:27017/tinyurl
+      PORT: 4000
+      BASE_URL: "pbid.io/"
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
     volumes:
-      - "./:/code"
+      - './web:/web'
+      - '/app/node_modules'
+    ports:
+      - 3000:3000
+
   database:
     image: mongo
     ports:
