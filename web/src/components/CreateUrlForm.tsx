@@ -1,8 +1,6 @@
 import React, {
   ChangeEventHandler,
-  EventHandler,
   FormEventHandler,
-  SyntheticEvent
 } from 'react'
 
 interface Props {

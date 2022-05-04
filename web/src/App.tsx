@@ -23,9 +23,8 @@ function App() {
   useEffect(() => {
     shortUrlsQuery().then(result => {
       setUrlList(result?.data?.shortUrls)
-      console.log('=====> Lazy query:', result?.data?.shortUrls)
     })
-  }, [url])
+  }, [url, shortUrlsQuery])
 
   const onSubmit: FormEventHandler = (event) => {
     event.preventDefault()
